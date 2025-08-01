@@ -93,3 +93,32 @@ test("shows new recipe after adding", async () => {
   //expect(recipe).toBeInTheDocument();
 });
 
+test("shows multiple recipes after adding them", async () => {
+  render(<App />);
+  async function enterRecipe(int) {
+    for (let x = 1; x < int + 1; x++) {
+      let button = screen.getByRole('button', { name: 'Add Recipe' });
+      userEvent.click(button);
+
+      // wait for the form/textbox to appear, used findBy because it returns a promise
+      let recipeNameBox = await screen.findByRole('textbox', { name: /Recipe name/i });
+      let recipeInstructionBox = screen.getByRole('textbox', { name: /instructions/i });
+
+      // add recipe
+      const recipeName = 'Tofu Scramble Tacos';
+      const recipeInstructions = "1. heat a skillet on medium with a dollop of coconut oil {enter} 2. warm flour tortillas";
+      userEvent.type(recipeNameBox, recipeName);
+      userEvent.type(recipeInstructionBox, recipeInstructions);
+
+      // click the submit button
+      let submitButton = screen.getByRole('button');
+      userEvent.click(submitButton);
+    }
+  }
+  enterRecipe(2);
+
+  let recipe = await screen.findAllByText(/Name:.*Tofu Scramble Tacos/i);
+
+  expect(recipe.length).toBe(2);
+
+})
